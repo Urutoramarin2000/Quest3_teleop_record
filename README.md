@@ -1,164 +1,77 @@
-<h1 align="center"><img src="img/logo.png" width="40"> Open-TeleVision: Teleoperation with
-
-Immersive Active Visual Feedback</h1>
-
-<p align="center">
-    <a href="https://chengxuxin.github.io/"><strong>Xuxin Cheng*</strong></a>
-    ·
-    <a href=""><strong>Jialong Li*</strong></a>
-    ·
-    <a href="https://aaronyang1223.github.io/"><strong>Shiqi Yang</strong></a>
-    <br>
-    <a href="https://www.episodeyang.com/"><strong>Ge Yang</strong></a>
-    ·
-    <a href="https://xiaolonw.github.io/"><strong>Xiaolong Wang</strong></a>
-</p>
-
-<p align="center">
-    <img src="img/UCSanDiegoLogo-BlueGold.png" height=50"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    <img src="img/mit-logo.png" height="50">
-</p>
-
-<h3 align="center"> CoRL 2024 </h3>
-
-<p align="center">
-<h3 align="center"><a href="https://robot-tv.github.io/">Website</a> | <a href="https://arxiv.org/abs/2407.01512/">arXiv</a> | <a href="">Video</a> | <a href="">Summary</a> </h3>
-  <div align="center"></div>
-</p>
-
-<p align="center">
-<img src="./img/main.webp" width="80%"/>
-</p>
-
-## Introduction
-This code contains implementation for teleoperation and imitation learning of Open-TeleVision.
-
 ## Installation
-
-```bash
+尽量在非机密网络下运行
+```
     conda create -n tv python=3.8
-    conda activate tv
+    conda activate television
     pip install -r requirements.txt
-    cd act/detr && pip install -e .
+    cd teleop
+    pip install -e .
 ```
+前往teleop目录进行key生成，获得本机ip：
 
-Install ZED sdk: https://www.stereolabs.com/developers/release/
+`ifconfig`
 
-Install ZED Python API:
-```
-    cd /usr/local/zed/ && python get_python_api.py
-```
+在teleop目录下用下面代码生成key（把192.168.8.102替换为本机ip）：
 
-If you want to try teleoperation example in a simulated environment (teleop_hand.py):
+`mkcert -install && mkcert -cert-file cert.pem -key-file key.pem 192.168.8.102 localhost 127.0.0.1`  
 
-Install Isaac Gym: https://developer.nvidia.com/isaac-gym/
+开放本地的8012端口：
 
-## Teleoperation Guide
+`sudo ufw allow 8012`
+## 代码说明
+遥操脚本使用说明：
+1. teleop_bridge.py，用于相机视频流stream接收与plot（特殊用途）
+2. teleop_exoskeleton.py，用与老版本的Dynamixel电机的同构teleop，需要接入同构机械臂再启用，夹爪状态由mediapipe输出，需要指定使用的识别相机（假如插入新的相机，默认使用电脑自带的相机）。
+3. teleop_vr.py，用于quest3的ik teleop，quest3负责出ee位置，通过pybullet输出dof_pos，可以指定是否在vr中接入图片
+数据录制脚本使用说明：
+1. /record/record_dual.py，/record/record_single.py，接入realsense相机，接收底层反馈的dofpos，用于数据采集，在会把数据保存到/record目录下
+2. /record/record_umi.pt,umi夹爪才采数据方式,使用鱼眼相机,接受夹爪反馈的开和角度,用于数据采集
+2. /record/record2dataset.py，把文件夹中所有的单独数据包做成一个大包。
+## Usage
+### television：
+television的两种使用方法：
+假如使用本地无线网进行teleop（这里默认使用一个单独的路由器专门完成此任务）：
+1. 接入一个路由器，手动设置lan口（为了不与机械臂控制的交换机冲突，将lan口的ip设置为手动的192.168.x.1），机械臂控制的交换机ip为192.168.1.x，所以需要避开。
+2. 手动设置电脑端的ip，这里设置为 `192.168.2.30`，假如设置为别的，请修改/utils/vuer/TeleVision_controller_pybullet.py中对应的ip
+3. 把电脑与quest3连入同一个无线网，电脑最好用网线接入
+5. 启动 `python teleop_vr.py` 
+6. 启动quest，在浏览器访问：[https://192.168.2.30:8012/](https://192.168.2.30:8012/)?ws=wss://[192.168.2.30:8012](http://192.168.2.30:8012)
+7. 点击enter vr进入沉浸模式，path through进入透视模式
 
-### Local streaming
-For **Quest** local streaming, follow [this](https://github.com/OpenTeleVision/TeleVision/issues/12#issue-2401541144) issue.
+![](images/rouder.png)
+![](images/ip.png)
+假如使用端口反向映射进行teleop：
+1. 把quest3用usb线连接电脑，在quest3中点击允许电脑访问
+2. 用 `adb devices`查看是否正确连接
+3. 使用 `adb reverse tcp:8012 tcp:8012`，进行反向映射
+4. 修改/utils/vuer/TeleVision_controller_pybullet.py中对应的ip为localhost
+5. 启动 `python teleop_vr.py` 
+6. 启动quest，在浏览器访问：[https://localhost:8012/](https://192.168.2.30:8012/)?ws=wss://[localhost:8012](http://192.168.2.30:8012)
 
-**Apple** does not allow WebXR on non-https connections. To test the application locally, we need to create a self-signed certificate and install it on the client. You need a ubuntu machine and a router. Connect the VisionPro and the ubuntu machine to the same router. 
-1. install mkcert: https://github.com/FiloSottile/mkcert
-2. check local ip address: 
-
-```
-    ifconfig | grep inet
-```
-Suppose the local ip address of the ubuntu machine is `192.168.8.102`.
-
-3. create certificate: 
-
-```
-    mkcert -install && mkcert -cert-file cert.pem -key-file key.pem 192.168.8.102 localhost 127.0.0.1
-```
-ps. place the generated `cert.pem` and `key.pem` files in `teleop`.
-
-4. open firewall on server
-```
-    sudo iptables -A INPUT -p tcp --dport 8012 -j ACCEPT
-    sudo iptables-save
-    sudo iptables -L
-```
-or can be done with `ufw`:
-```
-    sudo ufw allow 8012
-```
-5.
-```
-    tv = OpenTeleVision(self.resolution_cropped, shm.name, image_queue, toggle_streaming, ngrok=False)
-```
-
-6. install ca-certificates on VisionPro
-```
-    mkcert -CAROOT
-```
-Copy the rootCA.pem via AirDrop to VisionPro and install it.
-
-Settings > General > About > Certificate Trust Settings. Under "Enable full trust for root certificates", turn on trust for the certificate.
-
-settings > Apps > Safari > Advanced > Feature Flags > Enable WebXR Related Features
-
-7. open the browser on Safari on VisionPro and go to `https://192.168.8.102:8012?ws=wss://192.168.8.102:8012`
-
-8. Click `Enter VR` and ``Allow`` to start the VR session.
-
-### Network Streaming
-For Meta Quest3, installation of the certificate is not trivial. We need to use a network streaming solution. We use `ngrok` to create a secure tunnel to the server. This method will work for both VisionPro and Meta Quest3.
-
-1. Install ngrok: https://ngrok.com/download
-2. Run ngrok
-```
-    ngrok http 8012
-```
-3. Copy the https address and open the browser on Meta Quest3 and go to the address.
-
-ps. When using ngrok for network streaming, remember to call `OpenTeleVision` with:
-```
-    self.tv = OpenTeleVision(self.resolution_cropped, self.shm.name, image_queue, toggle_streaming, ngrok=True)
-```
-
-### Simulation Teleoperation Example
-1. After setup up streaming with either local or network streaming following the above instructions, you can try teleoperating two robot hands in Issac Gym:
-```
-    cd teleop && python teleop_hand.py
-```
-2. Go to your vuer site on VisionPro, click `Enter VR` and ``Allow`` to enter immersive environment.
-
-3. See your hands in 3D!
-<img src=img/sim.png>
-
-## Training Guide
-1. Download dataset from https://drive.google.com/drive/folders/11WO96mUMjmxRo9Hpvm4ADz7THuuGNEMY?usp=sharing.
-
-2. Place the downloaded dataset in ``data/recordings/``.
-
-3. Process the specified dataset for training using ``scripts/post_process.py``.
-
-4. You can verify the image and action sequences of a specific episode in the dataset using ``scripts/replay_demo.py``.
-
-5. To train ACT, run:
-```
-    python imitate_episodes.py --policy_class ACT --kl_weight 10 --chunk_size 60 --hidden_dim 512 --batch_size 45 --dim_feedforward 3200 --num_epochs 50000 --lr 5e-5 --seed 0 --taskid 00 --exptid 01-sample-expt
-```
-
-6. After training, save jit for the desired checkpoint:
-```
-    python imitate_episodes.py --policy_class ACT --kl_weight 10 --chunk_size 60 --hidden_dim 512 --batch_size 45 --dim_feedforward 3200 --num_epochs 50000 --lr 5e-5 --seed 0 --taskid 00 --exptid 01-sample-expt\
-                               --save_jit --resume_ckpt 25000
-```
-
-7. You can visualize the trained policy with inputs from dataset using ``scripts/deploy_sim.py``, example usage:
-```
-    python deploy_sim.py --taskid 00 --exptid 01 --resume_ckpt 25000
-```
-
-## Citation
-```
-@article{cheng2024tv,
-title={Open-TeleVision: Teleoperation with Immersive Active Visual Feedback},
-author={Cheng, Xuxin and Li, Jialong and Yang, Shiqi and Yang, Ge and Wang, Xiaolong},
-journal={arXiv preprint arXiv:2407.01512},
-year={2024}
-}
-```
+在teleop_vr.py中可以选择是否接入realsense，指定camera_serial，并且可以选择是否使用真实反馈的arm dof，具体信息请查看代码。
+操作说明：
+- 使用rightcontroller进行操作，leftcontroller被禁用
+- `食指板机`控制夹爪开闭，方块显示绿色则发出的指令为关闭，默认打开方块为蓝色
+- `中指板机`用于控制夹爪是否跟随，按下则ik求解当前controller的位置，使用zmq将控制指令发出（只有在按下时才发）
+- `按钮A`用于让机械臂返回一个默认位置
+- `meta键`长按用于重置位置
+### record
+直接根据需求运行record_dual.py或者record_single.py，记得修改端口与camera信息（若修改）。
+操作说明：
+- R键开始录制
+- F键停止录制并保存
+- T键放弃当前数据
+- M键给当前时间帧打点
+## ISSUE（已全部解决）
+1. 只有一个controller会卡住的问题
+2. 头手坐标转换的问题，把urdf的base放到0位，然后直接把controller的xyz给发出去，但是需要人的位置默认在0点
+3. 初始位置的问题
+4. 有没有办法重置人的坐标
+5. 把crpilot和录制全部整合进来
+### 交互
+- 若没有squeeze，则发送一个固定的初始坐标
+- 若squeeze，则发送ik求完的坐标
+### 坐标转换
+- 获取头与右手的的xyz，ryp
+- 用手的xyz减去头的xyz得到手相对于头的xyz坐标
+- 最终输出手相对于头的xyz与自己在世界坐标系的ryp

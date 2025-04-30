@@ -1,0 +1,68 @@
+digraph G {
+node [shape=box];
+"base_link" [label="base_link"];
+"link1" [label="link1"];
+"link2" [label="link2"];
+"link3" [label="link3"];
+"link4" [label="link4"];
+"link5" [label="link5"];
+"link6" [label="link6"];
+"link13" [label="link13"];
+"link15" [label="link15"];
+"link16" [label="link16"];
+"link17" [label="link17"];
+"link18" [label="link18"];
+"link19" [label="link19"];
+"link20" [label="link20"];
+"l_ace" [label="l_ace"];
+"r_ace" [label="r_ace"];
+"link7" [label="link7"];
+"link8" [label="link8"];
+"link9" [label="link9"];
+"link10" [label="link10"];
+"link11" [label="link11"];
+"link12" [label="link12"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_link" -> "joint1" [label="xyz: 0 0.163867 0.020299 \nrpy: 0 -0 0"]
+"joint1" -> "link1"
+"link1" -> "joint2" [label="xyz: 0.00550023 0 0.053 \nrpy: 0 1.5708 -0"]
+"joint2" -> "link2"
+"link2" -> "joint3" [label="xyz: 0 0.0693 0.045 \nrpy: -1.5708 0.927838 9.25857e-17"]
+"joint3" -> "link3"
+"link3" -> "joint4" [label="xyz: 0.250689 -0.000168114 0.0396988 \nrpy: 0 0 -1.85513"]
+"joint4" -> "link4"
+"link4" -> "joint5" [label="xyz: 0.25 0 0.0482571 \nrpy: 0 0 -0.643501"]
+"joint5" -> "link5"
+"link4" -> "joint6" [label="xyz: 0.25 0 -0.05595 \nrpy: 3.14159 -0 -0.643501"]
+"joint6" -> "link6"
+"base_link" -> "joint13" [label="xyz: -0.13004 0.049865 0.12336 \nrpy: 1.5708 -0 0"]
+"joint13" -> "link13"
+"base_link" -> "joint15" [label="xyz: 0.17597 -0.0001347 0.40106 \nrpy: 0 -0 0"]
+"joint15" -> "link15"
+"link15" -> "joint16" [label="xyz: 0 -0.049 0.063 \nrpy: 1.5708 -0 0"]
+"joint16" -> "link16"
+"link16" -> "joint17" [label="xyz: 0.34 0 -0.0055 \nrpy: 0 -0 0"]
+"joint17" -> "link17"
+"link17" -> "joint18" [label="xyz: 0.1892 0.07 -0.0435 \nrpy: 1.5708 -0 1.5708"]
+"joint18" -> "link18"
+"link18" -> "joint19" [label="xyz: 0 -0.0265 0.2658 \nrpy: 0 -1.5708 1.5708"]
+"joint19" -> "link19"
+"link19" -> "joint20" [label="xyz: 0.1085 0 -0.0265 \nrpy: -1.5708 -0 -1.5708"]
+"joint20" -> "link20"
+"link20" -> "l_hand_keypoint_joint" [label="xyz: 0 0 0.08 \nrpy: 0 -1.5708 3.14159"]
+"l_hand_keypoint_joint" -> "l_ace"
+"link20" -> "r_hand_keypoint_joint" [label="xyz: 0 0 0.08 \nrpy: 0 1.5708 -1.5708"]
+"r_hand_keypoint_joint" -> "r_ace"
+"base_link" -> "joint7" [label="xyz: 0 -0.164133 0.0202991 \nrpy: 0 -0 3.14159"]
+"joint7" -> "link7"
+"link7" -> "joint8" [label="xyz: -0.0055 0 0.053 \nrpy: 0 1.5708 -3.14159"]
+"joint8" -> "link8"
+"link8" -> "joint9" [label="xyz: 0 -0.0693 0.045 \nrpy: 1.5708 0.927295 0"]
+"joint9" -> "link9"
+"link9" -> "joint10" [label="xyz: 0.250689 3.21116e-05 0.0397012 \nrpy: 0 -0 1.85459"]
+"joint10" -> "link10"
+"link10" -> "joint11" [label="xyz: 0.25 0 0.04725 \nrpy: 0 -0 0.643501"]
+"joint11" -> "link11"
+"link10" -> "joint12" [label="xyz: 0.25 0 -0.05625 \nrpy: -3.14159 -0 0.643501"]
+"joint12" -> "link12"
+}
